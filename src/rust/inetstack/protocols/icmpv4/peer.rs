@@ -128,10 +128,7 @@ impl<N: NetworkRuntime> SharedIcmpv4Peer<N> {
             yielder_handle: yielder.get_handle(),
             inflight: HashMap::<(u16, u16), AsyncValue<Result<(), Fail>>>::new(),
         }));
-        runtime.insert_background_coroutine(
-            "Inetstack::ICMP::background",
-            Box::pin(peer.clone().poll(yielder).fuse()),
-        )?;
+        runtime.insert_background_coroutine(Box::pin(peer.clone().poll(yielder).fuse()))?;
         Ok(peer)
     }
 

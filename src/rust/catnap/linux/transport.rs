@@ -390,10 +390,7 @@ impl SharedCatnapTransport {
         }));
         let mut me2: Self = me.clone();
         runtime
-            .insert_background_coroutine(
-                "catnap::transport::epoll",
-                Box::pin(async move { me2.poll(yielder).await }.fuse()),
-            )
+            .insert_background_coroutine(Box::pin(async move { me2.poll(yielder).await }.fuse()))
             .expect("should be able to insert background coroutine");
         me
     }

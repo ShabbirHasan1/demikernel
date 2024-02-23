@@ -156,13 +156,13 @@ impl SharedDemiRuntime {
     }
 
     /// Inserts the `coroutine` named `task_name` into the scheduler.
-    fn insert_coroutine(&mut self, task_name: &str, coroutine: Pin<Box<Operation>>) -> Result<QToken, Fail> {
-        trace!("Inserting coroutine: {:?}", task_name);
-        let task: OperationTask = OperationTask::new(task_name.to_string(), coroutine);
+    fn insert_coroutine(&mut self, coroutine: Pin<Box<Operation>>) -> Result<QToken, Fail> {
+        trace!("Inserting coroutine");
+        let task: OperationTask = OperationTask::new(coroutine);
         match self.scheduler.insert_task(task) {
             Some(task_id) => Ok(task_id.into()),
             None => {
-                let cause: String = format!("cannot schedule coroutine (task_name={:?})", &task_name);
+                let cause: String = format!("cannot schedule coroutine");
                 error!("insert_coroutine(): {}", cause);
                 Err(Fail::new(libc::EAGAIN, &cause))
             },
@@ -171,19 +171,14 @@ impl SharedDemiRuntime {
 
     /// The coroutine factory is a function that takes a yielder and returns a future. The future is then inserted into
     /// the scheduler.
-    pub fn insert_coroutine_with_tracking<F>(
-        &mut self,
-        task_name: &str,
-        coroutine_factory: F,
-        qd: QDesc,
-    ) -> Result<QToken, Fail>
+    pub fn insert_coroutine_with_tracking<F>(&mut self, coroutine_factory: F, qd: QDesc) -> Result<QToken, Fail>
     where
         F: FnOnce(Yielder) -> Pin<Box<dyn FusedFuture<Output = (QDesc, OperationResult)>>>,
     {
         let yielder: Yielder = Yielder::new();
         let yielder_handle: YielderHandle = yielder.get_handle();
         let coroutine: Pin<Box<dyn FusedFuture<Output = (QDesc, OperationResult)>>> = coroutine_factory(yielder);
-        match self.insert_coroutine(task_name, coroutine) {
+        match self.insert_coroutine(coroutine) {
             Ok(qt) => {
                 // This allows to keep track of currently running coroutines.
                 self.pending_ops
@@ -204,7 +199,6 @@ impl SharedDemiRuntime {
             .remove_task(qt.into())
             .expect("Removing task that does not exist (either was previously removed or never inserted");
         // 2. Cast to void and then downcast to operation task.
-        trace!("Removing coroutine: {:?}", boxed_task.get_name());
         let operation_task: OperationTask = OperationTask::from(boxed_task.as_any());
         let (qd, result): (QDesc, OperationResult) = operation_task.get_result().expect("coroutine not finished");
         self.cancel_or_remove_pending_ops_as_needed(&result, qd, qt);
@@ -253,15 +247,14 @@ impl SharedDemiRuntime {
     /// Inserts the background `coroutine` named `task_name` into the scheduler.
     pub fn insert_background_coroutine(
         &mut self,
-        task_name: &str,
         coroutine: Pin<Box<dyn FusedFuture<Output = ()>>>,
     ) -> Result<QToken, Fail> {
-        trace!("Inserting background coroutine: {:?}", task_name);
-        let task: BackgroundTask = BackgroundTask::new(task_name.to_string(), coroutine);
+        trace!("Inserting background coroutine");
+        let task: BackgroundTask = BackgroundTask::new(coroutine);
         match self.scheduler.insert_task(task) {
             Some(task_id) => Ok(task_id.into()),
             None => {
-                let cause: String = format!("cannot schedule coroutine (task_name={:?})", &task_name);
+                let cause: String = format!("cannot schedule coroutine");
                 error!("insert_background_coroutine(): {}", cause);
                 Err(Fail::new(libc::EAGAIN, &cause))
             },
@@ -272,10 +265,7 @@ impl SharedDemiRuntime {
     /// there is no need to cast it.
     pub fn remove_background_coroutine(&mut self, qt: QToken) -> Result<(), Fail> {
         match self.scheduler.remove_task(qt.into()) {
-            Some(boxed_task) => {
-                trace!("Removing background coroutine: {:?}", boxed_task.get_name());
-                Ok(())
-            },
+            Some(_) => Ok(()),
             None => {
                 let cause: String = format!("cannot remove coroutine (task_id={:?})", qt);
                 error!("remove_background_coroutine(): {}", cause);

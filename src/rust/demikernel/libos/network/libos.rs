@@ -191,12 +191,11 @@ impl<T: NetworkTransport> SharedNetworkLibOS<T> {
 
         let mut queue: SharedNetworkQueue<T> = self.get_shared_queue(&qd)?;
         let coroutine_constructor = || -> Result<QToken, Fail> {
-            let task_name: String = format!("NetworkLibOS::accept for qd={:?}", qd);
             let coroutine_factory =
                 |yielder| -> Pin<Box<Operation>> { Box::pin(self.clone().accept_coroutine(qd, yielder).fuse()) };
             self.runtime
                 .clone()
-                .insert_coroutine_with_tracking(&task_name, coroutine_factory, qd)
+                .insert_coroutine_with_tracking(coroutine_factory, qd)
         };
 
         queue.accept(coroutine_constructor)
@@ -245,13 +244,12 @@ impl<T: NetworkTransport> SharedNetworkLibOS<T> {
         // FIXME: add IPv6 support; https://github.com/microsoft/demikernel/issues/935
         let mut queue: SharedNetworkQueue<T> = self.get_shared_queue(&qd)?;
         let coroutine_constructor = || -> Result<QToken, Fail> {
-            let task_name: String = format!("NetworkLibOS::connect for qd={:?}", qd);
             let coroutine_factory = |yielder| -> Pin<Box<Operation>> {
                 Box::pin(self.clone().connect_coroutine(qd, remote, yielder).fuse())
             };
             self.runtime
                 .clone()
-                .insert_coroutine_with_tracking(&task_name, coroutine_factory, qd)
+                .insert_coroutine_with_tracking(coroutine_factory, qd)
         };
 
         queue.connect(coroutine_constructor)
@@ -288,12 +286,11 @@ impl<T: NetworkTransport> SharedNetworkLibOS<T> {
 
         let mut queue: SharedNetworkQueue<T> = self.get_shared_queue(&qd)?;
         let coroutine_constructor = || -> Result<QToken, Fail> {
-            let task_name: String = format!("NetworkLibOS::close for qd={:?}", qd);
             let coroutine_factory =
                 |yielder| -> Pin<Box<Operation>> { Box::pin(self.clone().close_coroutine(qd, yielder).fuse()) };
             self.runtime
                 .clone()
-                .insert_coroutine_with_tracking(&task_name, coroutine_factory, qd)
+                .insert_coroutine_with_tracking(coroutine_factory, qd)
         };
 
         queue.close(coroutine_constructor)
@@ -359,12 +356,11 @@ impl<T: NetworkTransport> SharedNetworkLibOS<T> {
 
         let mut queue: SharedNetworkQueue<T> = self.get_shared_queue(&qd)?;
         let coroutine_constructor = || -> Result<QToken, Fail> {
-            let task_name: String = format!("NetworkLibOS::push for qd={:?}", qd);
             let coroutine_factory =
                 |yielder| -> Pin<Box<Operation>> { Box::pin(self.clone().push_coroutine(qd, buf, yielder).fuse()) };
             self.runtime
                 .clone()
-                .insert_coroutine_with_tracking(&task_name, coroutine_factory, qd)
+                .insert_coroutine_with_tracking(coroutine_factory, qd)
         };
 
         queue.push(coroutine_constructor)
@@ -404,13 +400,12 @@ impl<T: NetworkTransport> SharedNetworkLibOS<T> {
 
         let mut queue: SharedNetworkQueue<T> = self.get_shared_queue(&qd)?;
         let coroutine_constructor = || -> Result<QToken, Fail> {
-            let task_name: String = format!("NetworkLibOS::pushto for qd={:?}", qd);
             let coroutine_factory = |yielder| -> Pin<Box<Operation>> {
                 Box::pin(self.clone().pushto_coroutine(qd, buf, remote, yielder).fuse())
             };
             self.runtime
                 .clone()
-                .insert_coroutine_with_tracking(&task_name, coroutine_factory, qd)
+                .insert_coroutine_with_tracking(coroutine_factory, qd)
         };
 
         queue.push(coroutine_constructor)
@@ -454,12 +449,11 @@ impl<T: NetworkTransport> SharedNetworkLibOS<T> {
 
         let mut queue: SharedNetworkQueue<T> = self.get_shared_queue(&qd)?;
         let coroutine_constructor = || -> Result<QToken, Fail> {
-            let task_name: String = format!("NetworkLibOS::pop for qd={:?}", qd);
             let coroutine_factory =
                 |yielder| -> Pin<Box<Operation>> { Box::pin(self.clone().pop_coroutine(qd, size, yielder).fuse()) };
             self.runtime
                 .clone()
-                .insert_coroutine_with_tracking(&task_name, coroutine_factory, qd)
+                .insert_coroutine_with_tracking(coroutine_factory, qd)
         };
 
         queue.pop(coroutine_constructor)

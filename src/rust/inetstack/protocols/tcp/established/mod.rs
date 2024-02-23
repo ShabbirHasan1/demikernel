@@ -102,10 +102,8 @@ impl<N: NetworkRuntime> EstablishedSocket<N> {
             recv_queue.clone(),
             ack_queue.clone(),
         );
-        let qt: QToken = runtime.insert_background_coroutine(
-            "Inetstack::TCP::established::background",
-            Box::pin(background::background(cb.clone(), dead_socket_tx).fuse()),
-        )?;
+        let qt: QToken =
+            runtime.insert_background_coroutine(Box::pin(background::background(cb.clone(), dead_socket_tx).fuse()))?;
         Ok(Self {
             cb,
             recv_queue,
