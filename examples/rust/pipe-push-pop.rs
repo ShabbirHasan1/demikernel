@@ -173,7 +173,7 @@ impl PipeServer {
         }
 
         #[cfg(feature = "profiler")]
-        profiler::write(&mut std::io::stdout(), None).expect("failed to write to stdout");
+        profiler::write(&mut std::io::stdout(), None).unwrap();
 
         Ok(())
     }
@@ -222,7 +222,7 @@ impl PipeClient {
         }
 
         #[cfg(feature = "profiler")]
-        profiler::write(&mut std::io::stdout(), None).expect("failed to write to stdout");
+        profiler::write(&mut std::io::stdout(), None).unwrap();
 
         Ok(())
     }

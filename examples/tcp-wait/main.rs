@@ -45,7 +45,7 @@ fn main() -> Result<()> {
         LibOS::new(libos_name)?
     };
 
-    match args.peer_type().expect("missing peer_type").as_str() {
+    match args.peer_type().unwrap().as_str() {
         "client" => {
             let mut client: TcpClient = TcpClient::new(libos, args.addr(), args.nclients())?;
             match args.scenario().as_str() {

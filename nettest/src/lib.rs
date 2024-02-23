@@ -36,7 +36,7 @@ pub fn run_lexer(line: &str, verbose: bool) -> Result<()> {
                         .get_rule_by_id(id)
                         .name
                         .as_ref()
-                        .expect("lexical rules should have names");
+                        .unwrap();
                     println!("Lexeme: name={:?}, text={:?}", name, text);
                 }
             },

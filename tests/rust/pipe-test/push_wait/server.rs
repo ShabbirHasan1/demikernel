@@ -62,7 +62,7 @@ impl PipeServer {
 
         // Pop data.
         // The following call to except() is safe because pipeqd is ensured to be open and assigned Some() value.
-        let qt: QToken = self.libos.pop(self.pipeqd.expect("pipe should not be closed"), None)?;
+        let qt: QToken = self.libos.pop(self.pipeqd.unwrap(), None)?;
         let qr: demi_qresult_t = self.libos.wait(qt, None)?;
         let sga: demi_sgarray_t = match qr.qr_opcode {
             demi_opcode_t::DEMI_OPC_POP => unsafe { qr.qr_value.sga },

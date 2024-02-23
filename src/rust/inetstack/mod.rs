@@ -364,7 +364,7 @@ impl<N: NetworkRuntime> NetworkTransport for SharedInetStack<N> {
         match sd {
             Socket::Tcp(socket) => {
                 let socket = self.ipv4.tcp.accept(socket, yielder).await?;
-                let addr = socket.remote().expect("accepted socket must have an endpoint");
+                let addr = socket.remote().unwrap();
                 Ok((Socket::Tcp(socket), addr.into()))
             },
             // This queue descriptor does not concern a TCP socket.

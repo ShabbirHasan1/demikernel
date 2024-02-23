@@ -152,10 +152,10 @@ impl SharedCatmemQueue {
                     if eof {
                         self.ring.prepare_close()?;
                         self.ring.commit();
-                        buf.trim(size).expect("should be able to trim to a zero-length buffer");
+                        buf.trim(size).unwrap();
                     } else {
                         buf.trim(size - len)
-                            .expect("should be able to trim down to only read bytes");
+                            .unwrap();
                     }
                     break eof;
                 },
@@ -184,7 +184,7 @@ impl SharedCatmemQueue {
                     return Ok(());
                 },
                 Ok(len) if len < buf.len() => {
-                    buf.adjust(len).expect("should be able to split remaining bytes");
+                    buf.adjust(len).unwrap();
                     continue;
                 },
                 Ok(len) => unreachable!(

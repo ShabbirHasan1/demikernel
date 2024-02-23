@@ -147,7 +147,7 @@ impl<N: NetworkRuntime> SharedArpPeer<N> {
                 self.waiters.insert(ipv4_addr, wait_queue);
             }
         }
-        rx.await.expect("Dropped waiter?")
+        rx.await.unwrap()
     }
 
     async fn poll(mut self) {

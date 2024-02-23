@@ -149,7 +149,7 @@ mod tests {
         b.iter(|| {
             let val: u64 = black_box(x);
             let w64: Waker64 = Waker64::new(64);
-            w64.fetch_sub(val).expect("fetch_sub() overflowed");
+            w64.fetch_sub(val).unwrap();
         });
     }
 

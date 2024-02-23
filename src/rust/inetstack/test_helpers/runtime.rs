@@ -92,7 +92,7 @@ impl SharedTestRuntime {
 
     /// Remove a single frame from the runtime's outgoing queue. The queue should not be empty.
     pub fn pop_frame(&mut self) -> DemiBuffer {
-        self.pop_frames(1).pop_front().expect("should be at least one frame")
+        self.pop_frames(1).pop_front().unwrap()
     }
 
     /// Get the link address assigned to the runtime.

@@ -90,7 +90,7 @@ fn test_ipv4_header_parse_good() -> Result<()> {
     const DATAGRAM_SIZE: usize = HEADER_MAX_SIZE + PAYLOAD_SIZE;
     let mut buf: [u8; DATAGRAM_SIZE] = [0; DATAGRAM_SIZE];
     let data: [u8; PAYLOAD_SIZE] = [1, 2, 3, 4, 5, 6, 7, 8];
-    let data_bytes: DemiBuffer = DemiBuffer::from_slice(&data).expect("'data' should fit in a DemiBuffer");
+    let data_bytes: DemiBuffer = DemiBuffer::from_slice(&data).unwrap();
 
     for ihl in 5..16 {
         let header_size: usize = (ihl as usize) << 2;

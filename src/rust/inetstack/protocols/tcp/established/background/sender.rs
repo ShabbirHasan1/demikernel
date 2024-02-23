@@ -129,7 +129,7 @@ pub async fn sender<N: NetworkRuntime>(mut cb: SharedControlBlock<N>, yielder: Y
         futures::pin_mut!(ltci_changed);
 
         let effective_cwnd: u32 = cwnd + ltci;
-        let next_buf_size: usize = cb.unsent_top_size().expect("no buffer in unsent queue");
+        let next_buf_size: usize = cb.unsent_top_size().unwrap();
 
         let sent_data: u32 = (send_next - send_unacked).into();
         if win_sz <= (sent_data + next_buf_size as u32)
@@ -159,9 +159,7 @@ pub async fn sender<N: NetworkRuntime>(mut cb: SharedControlBlock<N>, yielder: Y
             cmp::min((win_sz - sent_data) as usize, cb.get_mss()),
             (effective_cwnd - sent_data) as usize,
         );
-        let (segment_data, do_push): (DemiBuffer, bool) = cb
-            .pop_unsent_segment(max_size)
-            .expect("No unsent data with sequence number gap?");
+        let (segment_data, do_push): (DemiBuffer, bool) = cb.pop_unsent_segment(max_size).unwrap();
         let mut segment_data_len: u32 = segment_data.len() as u32;
 
         let rto: Duration = cb.rto();

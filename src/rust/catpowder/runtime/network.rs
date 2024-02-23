@@ -79,9 +79,8 @@ impl NetworkRuntime for LinuxRuntime {
             unsafe {
                 let bytes: [u8; limits::RECVBUF_SIZE_MAX] =
                     mem::transmute::<[MaybeUninit<u8>; limits::RECVBUF_SIZE_MAX], [u8; limits::RECVBUF_SIZE_MAX]>(out);
-                let mut dbuf: DemiBuffer = DemiBuffer::from_slice(&bytes).expect("'bytes' should fit");
-                dbuf.trim(limits::RECVBUF_SIZE_MAX - nbytes)
-                    .expect("'bytes' <= RECVBUF_SIZE_MAX");
+                let mut dbuf: DemiBuffer = DemiBuffer::from_slice(&bytes).unwrap();
+                dbuf.trim(limits::RECVBUF_SIZE_MAX - nbytes).unwrap();
                 ret.push(dbuf);
             }
             ret

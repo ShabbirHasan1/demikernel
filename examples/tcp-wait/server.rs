@@ -92,7 +92,7 @@ impl TcpServer {
     // Attempts to wait for a push() operation to complete after asynchronous closing a socket.
     pub fn run(&mut self) -> Result<()> {
         self.libos
-            .listen(self.sockqd.expect("should be a valid socket"), self.nclients)?;
+            .listen(self.sockqd.unwrap(), self.nclients)?;
         self.issue_accept()?;
 
         loop {
@@ -148,7 +148,7 @@ impl TcpServer {
             }
         }
 
-        match self.libos.close(self.sockqd.expect("should be a valid socket")) {
+        match self.libos.close(self.sockqd.unwrap()) {
             Ok(_) => {
                 self.sockqd = None;
             },
@@ -190,9 +190,9 @@ impl TcpServer {
     }
 
     fn issue_accept(&mut self) -> Result<()> {
-        let qt: QToken = self.libos.accept(self.sockqd.expect("should be a valid socket"))?;
+        let qt: QToken = self.libos.accept(self.sockqd.unwrap())?;
         self.qts_reverse
-            .insert(qt, self.sockqd.expect("should be a valid socket"));
+            .insert(qt, self.sockqd.unwrap());
         self.qts.push(qt);
         Ok(())
     }

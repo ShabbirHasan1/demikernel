@@ -136,8 +136,7 @@ impl<N: NetworkRuntime> SharedTcpSocket<N> {
         let recv_queue: SharedAsyncQueue<(Ipv4Header, TcpHeader, DemiBuffer)> =
             SharedAsyncQueue::<(Ipv4Header, TcpHeader, DemiBuffer)>::default();
         self.state = SocketState::Listening(SharedPassiveSocket::new(
-            self.local()
-                .expect("If we were able to prepare, then the socket must be bound"),
+            self.local().unwrap(),
             backlog,
             self.runtime.clone(),
             recv_queue.clone(),

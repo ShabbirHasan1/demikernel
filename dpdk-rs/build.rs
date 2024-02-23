@@ -305,7 +305,7 @@ fn os_build() -> Result<()> {
         .generate()
         .unwrap_or_else(|e| panic!("Failed to generate bindings: {:?}", e));
     let bindings_out = out_dir.join("bindings.rs");
-    bindings.write_to_file(bindings_out).expect("Failed to write bindings");
+    bindings.write_to_file(bindings_out).unwrap();
 
     // Step 3: Compile a stub file so Rust can access `inline` functions in the headers
     // that aren't compiled into the libraries.

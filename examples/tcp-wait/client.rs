@@ -72,7 +72,7 @@ impl TcpClient {
         for i in 0..self.nclients {
             self.connect_to_server(i)?;
             let push_qt: QToken = self.issue_push(i)?;
-            let async_close_qt: QToken = self.libos.async_close(self.sockqd.expect("should be a valid socket"))?;
+            let async_close_qt: QToken = self.libos.async_close(self.sockqd.unwrap())?;
 
             // Wait for async_close().
             match self.libos.wait(async_close_qt, None) {
@@ -97,8 +97,8 @@ impl TcpClient {
     pub fn pop_async_close_wait(&mut self) -> Result<()> {
         for i in 0..self.nclients {
             self.connect_to_server(i)?;
-            let pop_qt: QToken = self.libos.pop(self.sockqd.expect("should be a valid socket"), None)?;
-            let async_close_qt: QToken = self.libos.async_close(self.sockqd.expect("should be a valid socket"))?;
+            let pop_qt: QToken = self.libos.pop(self.sockqd.unwrap(), None)?;
+            let async_close_qt: QToken = self.libos.async_close(self.sockqd.unwrap())?;
 
             // Wait for async_close().
             match self.libos.wait(async_close_qt, None) {
@@ -139,7 +139,7 @@ impl TcpClient {
             self.connect_to_server(i)?;
             let push_qt: QToken = self.issue_push(i)?;
 
-            match self.libos.close(self.sockqd.expect("should be a valid socket")) {
+            match self.libos.close(self.sockqd.unwrap()) {
                 Ok(_) => {
                     self.sockqd = None;
                 },
@@ -163,9 +163,9 @@ impl TcpClient {
         // Open several connections.
         for i in 0..self.nclients {
             self.connect_to_server(i)?;
-            let pop_qt: QToken = self.libos.pop(self.sockqd.expect("should be a valid socket"), None)?;
+            let pop_qt: QToken = self.libos.pop(self.sockqd.unwrap(), None)?;
 
-            match self.libos.close(self.sockqd.expect("should be a valid socket")) {
+            match self.libos.close(self.sockqd.unwrap()) {
                 Ok(_) => {
                     self.sockqd = None;
                 },
@@ -203,7 +203,7 @@ impl TcpClient {
         for i in 0..self.nclients {
             self.connect_to_server(i)?;
             let push_qt: QToken = self.issue_push(i)?;
-            let async_close_qt: QToken = self.libos.async_close(self.sockqd.expect("should be a valid socket"))?;
+            let async_close_qt: QToken = self.libos.async_close(self.sockqd.unwrap())?;
 
             // Wait for push().
             match self.libos.wait(push_qt, None) {
@@ -230,8 +230,8 @@ impl TcpClient {
     pub fn pop_async_close_pending_wait(&mut self) -> Result<()> {
         for i in 0..self.nclients {
             self.connect_to_server(i)?;
-            let pop_qt: QToken = self.libos.pop(self.sockqd.expect("should be a valid socket"), None)?;
-            let async_close_qt: QToken = self.libos.async_close(self.sockqd.expect("should be a valid socket"))?;
+            let pop_qt: QToken = self.libos.pop(self.sockqd.unwrap(), None)?;
+            let async_close_qt: QToken = self.libos.async_close(self.sockqd.unwrap())?;
 
             // Wait for pop().
             match self.libos.wait(pop_qt, None) {
@@ -289,7 +289,7 @@ impl TcpClient {
         let fill_char: u8 = (i % (u8::MAX as usize - 1) + 1) as u8;
         const BUFSIZE: usize = 64;
         let sga: demi_sgarray_t = self.make_sgarray(BUFSIZE, fill_char)?;
-        let qt: QToken = self.libos.push(self.sockqd.expect("should be a valid socket"), &sga)?;
+        let qt: QToken = self.libos.push(self.sockqd.unwrap(), &sga)?;
         Ok(qt)
     }
 
@@ -297,7 +297,7 @@ impl TcpClient {
         self.sockqd = Some(self.libos.socket(AF_INET, SOCK_STREAM, 0)?);
         let qt: QToken = self
             .libos
-            .connect(self.sockqd.expect("should be a valid socket"), self.remote)?;
+            .connect(self.sockqd.unwrap(), self.remote)?;
         let qr: demi_qresult_t = self.libos.wait(qt, None)?;
         match qr.qr_opcode {
             demi_opcode_t::DEMI_OPC_CONNECT => {

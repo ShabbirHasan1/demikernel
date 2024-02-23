@@ -319,10 +319,7 @@ impl Sender {
 
                 if segment.bytes.len() > bytes_remaining {
                     // Only some of the data in this segment has been acked.  Remove just the acked amount.
-                    segment
-                        .bytes
-                        .adjust(bytes_remaining)
-                        .expect("'segment' should contain at least 'bytes_remaining'");
+                    segment.bytes.adjust(bytes_remaining).unwrap();
                     segment.initial_tx = None;
 
                     // Leave this segment on the unacknowledged queue.
@@ -355,10 +352,8 @@ impl Sender {
         let buf_len: usize = buf.len();
 
         // Pop one byte off the buf still in the queue and all but one of the bytes on our clone.
-        buf.adjust(1).expect("'buf' should contain at least one byte");
-        cloned_buf
-            .trim(buf_len - 1)
-            .expect("'cloned_buf' should contain at least one less than its professed length");
+        buf.adjust(1).unwrap();
+        cloned_buf.trim(buf_len - 1).unwrap();
 
         Some(cloned_buf)
     }
@@ -373,11 +368,8 @@ impl Sender {
         if buf_len > max_bytes {
             let mut cloned_buf: DemiBuffer = buf.clone();
 
-            buf.adjust(max_bytes)
-                .expect("'buf' should contain at least 'max_bytes'");
-            cloned_buf
-                .trim(buf_len - max_bytes)
-                .expect("'cloned_buf' should contain at least less than its length");
+            buf.adjust(max_bytes).unwrap();
+            cloned_buf.trim(buf_len - max_bytes).unwrap();
 
             unsent_queue.push_front(buf);
             buf = cloned_buf;

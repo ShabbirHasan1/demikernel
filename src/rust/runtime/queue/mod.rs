@@ -296,7 +296,7 @@ mod tests {
         b.iter(|| {
             let qd: QDesc = ioqueue_table.alloc::<TestQueue>(TestQueue {});
             black_box(qd);
-            let queue: TestQueue = ioqueue_table.free::<TestQueue>(&qd).expect("must be TestQueue");
+            let queue: TestQueue = ioqueue_table.free::<TestQueue>(&qd).unwrap();
             black_box(queue);
         });
     }

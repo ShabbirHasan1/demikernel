@@ -123,7 +123,7 @@ impl Default for WakerPageRef {
     fn default() -> Self {
         let layout: Layout = Layout::new::<WakerPage>();
         assert_eq!(layout.align(), WAKER_PAGE_SIZE);
-        let mut ptr: NonNull<WakerPage> = Global.allocate(layout).expect("Failed to allocate WakerPage").cast();
+        let mut ptr: NonNull<WakerPage> = Global.allocate(layout).unwrap().cast();
         unsafe {
             let page: &mut WakerPage = ptr.as_mut();
             page.reset();

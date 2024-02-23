@@ -133,7 +133,7 @@ impl ProgramArguments {
 
         // Socket address.
         let addr: SocketAddr = {
-            let addr: &String = matches.get_one::<String>("addr").expect("missing address");
+            let addr: &String = matches.get_one::<String>("addr").unwrap();
             SocketAddr::from_str(addr)?
         };
 

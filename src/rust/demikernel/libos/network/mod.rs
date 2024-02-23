@@ -273,7 +273,7 @@ impl NetworkLibOSWrapper {
             // For performance reasons we check for immediate expiration first.
             if let Some(timeout) = timeout {
                 if timeout == Duration::from_secs(0)
-                    || Instant::now().duration_since(start.expect("start should be set if timeout is")) > timeout
+                    || Instant::now().duration_since(start.unwrap()) > timeout
                 {
                     return Err(Fail::new(libc::ETIMEDOUT, "timer expired"));
                 }

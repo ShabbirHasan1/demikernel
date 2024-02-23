@@ -65,11 +65,7 @@ impl TaskGroup {
     /// Given a handle to a task, remove it from the scheduler
     pub fn remove(&mut self, task_id: TaskId) -> Option<Box<dyn Task>> {
         // We should not have a scheduler handle that refers to an invalid id, so unwrap and expect are safe here.
-        let pin_slab_index: usize = self
-            .ids
-            .remove(&task_id)
-            .expect("Token should be in the token table")
-            .into();
+        let pin_slab_index: usize = self.ids.remove(&task_id).unwrap().into();
         let (waker_page_ref, waker_page_offset): (&WakerPageRef, usize) = {
             let (waker_page_index, waker_page_offset) = self.get_waker_page_index_and_offset(pin_slab_index)?;
             (&self.waker_page_refs[waker_page_index], waker_page_offset)
@@ -104,10 +100,7 @@ impl TaskGroup {
 
         trace!("insert(): id={:?}, pin_slab_index={:?}", task_id, pin_slab_index);
         // Set this task's id.
-        self.tasks
-            .get_pin_mut(pin_slab_index)
-            .expect("just allocated!")
-            .set_id(task_id);
+        self.tasks.get_pin_mut(pin_slab_index).unwrap().set_id(task_id);
         Some(task_id)
     }
 

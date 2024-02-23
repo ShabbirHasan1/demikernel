@@ -97,14 +97,14 @@ impl SharedCatnapTransport {
     /// Create a new transport instance.
     pub fn new(config: &Config, runtime: &mut SharedDemiRuntime) -> Self {
         let config: WinConfig = WinConfig {
-            keepalive_params: config.tcp_keepalive().expect("failed to load TCP settings"),
-            linger_time: config.linger_time().expect("failed to load linger settings"),
-            nagle: config.nagle().expect("failed to load nagle's algorithm settings"),
+            keepalive_params: config.tcp_keepalive().unwrap(),
+            linger_time: config.linger_time().unwrap(),
+            nagle: config.nagle().unwrap(),
         };
 
         let me: Self = Self(SharedObject::new(CatnapTransport {
-            winsock: WinsockRuntime::new().expect("failed to initialize WinSock"),
-            iocp: IoCompletionPort::new().expect("failed to setup I/O completion port"),
+            winsock: WinsockRuntime::new().unwrap(),
+            iocp: IoCompletionPort::new().unwrap(),
             config,
             runtime: runtime.clone(),
         }));
@@ -117,7 +117,7 @@ impl SharedCatnapTransport {
                     async move { me.run_event_processor().await }.fuse()
                 }),
             )
-            .expect("should be able to insert background coroutine");
+            .unwrap();
 
         me
     }

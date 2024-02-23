@@ -42,11 +42,11 @@ fn main() -> Result<()> {
         LibOS::new(libos_name)?
     };
 
-    match args.who_closes().expect("missing whocloses the socket").as_str() {
-        "client" => match args.peer_type().expect("missing peer_type").as_str() {
+    match args.who_closes().unwrap().as_str() {
+        "client" => match args.peer_type().unwrap().as_str() {
             "client" => {
                 let mut client: TcpClient = TcpClient::new(libos, args.addr())?;
-                let nclients: usize = args.nclients().expect("missing number of clients");
+                let nclients: usize = args.nclients().unwrap();
                 match args.run_mode().as_str() {
                     "sequential" => client.run_sequential(nclients),
                     "concurrent" => client.run_concurrent(nclients),
@@ -59,10 +59,10 @@ fn main() -> Result<()> {
             },
             _ => anyhow::bail!("invalid peer type"),
         },
-        "server" => match args.peer_type().expect("missing peer_type").as_str() {
+        "server" => match args.peer_type().unwrap().as_str() {
             "client" => {
                 let mut client: TcpClient = TcpClient::new(libos, args.addr())?;
-                let nclients: usize = args.nclients().expect("missing number of clients");
+                let nclients: usize = args.nclients().unwrap();
                 match args.run_mode().as_str() {
                     "sequential" => client.run_sequential_expecting_server_to_close_sockets(nclients),
                     "concurrent" => client.run_concurrent_expecting_server_to_close_sockets(nclients),

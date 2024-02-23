@@ -386,8 +386,7 @@ impl TcpHeader {
             num_options,
             option_list,
         };
-        buf.adjust(data_offset)
-            .expect("buf should contain at least 'data_offset' bytes");
+        buf.adjust(data_offset).unwrap();
         Ok((header, buf))
     }
 

@@ -164,7 +164,7 @@ impl TcpServer {
             // Pop data.
             let qt: QToken = match self
                 .libos
-                .pop(self.accepted_qd.expect("should be a valid queue descriptor"), None)
+                .pop(self.accepted_qd.unwrap(), None)
             {
                 Ok(qt) => qt,
                 Err(e) => anyhow::bail!("pop failed: {:?}", e.cause),
@@ -178,17 +178,17 @@ impl TcpServer {
             };
 
             // Sanity check received data.
-            let ptr: *mut u8 = self.sga.expect("should be a valid sgarray").sga_segs[0].sgaseg_buf as *mut u8;
-            let len: usize = self.sga.expect("should be a valid sgarray").sga_segs[0].sgaseg_len as usize;
+            let ptr: *mut u8 = self.sga.unwrap().sga_segs[0].sgaseg_buf as *mut u8;
+            let len: usize = self.sga.unwrap().sga_segs[0].sgaseg_len as usize;
             let slice: &mut [u8] = unsafe { slice::from_raw_parts_mut(ptr, len) };
 
             for x in slice {
                 demikernel::ensure_eq!(*x, fill_char);
             }
 
-            i += self.sga.expect("should be a valid sgarray").sga_segs[0].sgaseg_len as usize;
+            i += self.sga.unwrap().sga_segs[0].sgaseg_len as usize;
 
-            match self.libos.sgafree(self.sga.expect("should be a valid sgarray")) {
+            match self.libos.sgafree(self.sga.unwrap()) {
                 Ok(_) => self.sga = None,
                 Err(e) => anyhow::bail!("failed to release scatter-gather array: {:?}", e),
             }
@@ -196,7 +196,7 @@ impl TcpServer {
         }
 
         #[cfg(feature = "profiler")]
-        profiler::write(&mut std::io::stdout(), None).expect("failed to write to stdout");
+        profiler::write(&mut std::io::stdout(), None).unwrap();
 
         // TODO: close socket when we get close working properly in catnip.
         Ok(())
@@ -270,7 +270,7 @@ impl TcpClient {
             // Push data.
             let qt: QToken = match self
                 .libos
-                .push(self.sockqd, &self.sga.expect("should be a valid sgarray"))
+                .push(self.sockqd, &self.sga.unwrap())
             {
                 Ok(qt) => qt,
                 Err(e) => anyhow::bail!("push failed: {:?}", e.cause),
@@ -282,9 +282,9 @@ impl TcpClient {
                 Ok(qr) => anyhow::bail!("unexpected opcode: {:?}", qr.qr_opcode),
                 Err(e) => anyhow::bail!("operation failed: {:?}", e.cause),
             };
-            i += self.sga.expect("should be a valid sgarray").sga_segs[0].sgaseg_len as usize;
+            i += self.sga.unwrap().sga_segs[0].sgaseg_len as usize;
 
-            match self.libos.sgafree(self.sga.expect("should be a valid sgarray")) {
+            match self.libos.sgafree(self.sga.unwrap()) {
                 Ok(_) => self.sga = None,
                 Err(e) => anyhow::bail!("failed to release scatter-gather array: {:?}", e),
             }
@@ -293,7 +293,7 @@ impl TcpClient {
         }
 
         #[cfg(feature = "profiler")]
-        profiler::write(&mut std::io::stdout(), None).expect("failed to write to stdout");
+        profiler::write(&mut std::io::stdout(), None).unwrap();
 
         // TODO: close socket when we get close working properly in catnip.
         Ok(())

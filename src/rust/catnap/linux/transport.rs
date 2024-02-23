@@ -115,7 +115,7 @@ impl PassiveSocketData {
             // Operation completed.
             Ok((new_socket, saddr)) => {
                 trace!("connection accepted ({:?})", new_socket);
-                let addr: SocketAddr = saddr.as_socket().expect("not a SocketAddrV4");
+                let addr: SocketAddr = saddr.as_socket().unwrap();
                 self.accept_queue.push(Ok((new_socket, addr)))
             },
             Err(e) => {
@@ -156,8 +156,7 @@ impl ActiveSocketData {
                 // Operation completed.
                 Ok(nbytes) => {
                     trace!("data pushed ({:?}/{:?} bytes)", nbytes, buf.len());
-                    buf.adjust(nbytes as usize)
-                        .expect("OS should not have sent more bytes than in the buffer");
+                    buf.adjust(nbytes as usize).unwrap();
                     if buf.is_empty() {
                         // Done sending this buffer
                         yielder_handle.wake_with(Ok(()))
@@ -227,16 +226,13 @@ impl ActiveSocketData {
         // Figure out how much data we got.
         let bytes_read: usize = min(incoming_buf.len(), size);
         // Trim the buffer down to the amount that we received.
-        buf.trim(buf.len() - bytes_read)
-            .expect("DemiBuffer must be bigger than size");
+        buf.trim(buf.len() - bytes_read).unwrap();
         // Move it if the buffer isn't empty.
         if !incoming_buf.is_empty() {
             buf.copy_from_slice(&incoming_buf[0..bytes_read]);
         }
         // Trim off everything that we moved.
-        incoming_buf
-            .adjust(bytes_read)
-            .expect("bytes_read will be less than incoming buf len because it is a min of incoming buf len and size ");
+        incoming_buf.adjust(bytes_read).unwrap();
         // We didn't consume all of the incoming data.
         if !incoming_buf.is_empty() {
             self.recv_queue.push_front(Ok((addr, incoming_buf)));
@@ -263,7 +259,7 @@ impl SharedSocketData {
     /// Moves an inactive socket to a passive listening socket.
     pub fn move_socket_to_passive(&mut self) {
         let socket: Socket = match self.deref_mut() {
-            SocketData::Inactive(socket) => socket.take().expect("should have data"),
+            SocketData::Inactive(socket) => socket.take().unwrap(),
             SocketData::Active(_) => unreachable!("should not be able to move an active socket to a passive one"),
             SocketData::Passive(_) => return,
         };
@@ -276,7 +272,7 @@ impl SharedSocketData {
     /// Moves an inactive socket to an active established socket.
     pub fn move_socket_to_active(&mut self) {
         let socket: Socket = match self.deref_mut() {
-            SocketData::Inactive(socket) => socket.take().expect("should have data"),
+            SocketData::Inactive(socket) => socket.take().unwrap(),
             SocketData::Active(_) => return,
             SocketData::Passive(_) => unreachable!("should not be able to move a passive socket to an active one"),
         };
@@ -391,7 +387,7 @@ impl SharedCatnapTransport {
         let mut me2: Self = me.clone();
         runtime
             .insert_background_coroutine(Box::pin(async move { me2.poll(yielder).await }.fuse()))
-            .expect("should be able to insert background coroutine");
+            .unwrap();
         me
     }
 
@@ -470,28 +466,16 @@ impl SharedCatnapTransport {
                 let offset: usize = event.u64 as usize;
                 if event.events | (libc::EPOLLIN as u32) != 0 {
                     // Wake pop.
-                    self.socket_table
-                        .get_mut(offset)
-                        .expect("should have allocated this when epoll was registered")
-                        .poll_in();
+                    self.socket_table.get_mut(offset).unwrap().poll_in();
                 }
                 if event.events | (libc::EPOLLOUT as u32) != 0 {
                     // Wake push.
-                    self.socket_table
-                        .get_mut(offset)
-                        .expect("should have allocated this when epoll was registered")
-                        .poll_out();
+                    self.socket_table.get_mut(offset).unwrap().poll_out();
                 }
                 if event.events | (libc::EPOLLERR as u32 | libc::EPOLLHUP as u32) != 0 {
                     // Wake both push and pop.
-                    self.socket_table
-                        .get_mut(offset)
-                        .expect("should have allocated this when epoll was registered")
-                        .poll_in();
-                    self.socket_table
-                        .get_mut(offset)
-                        .expect("should have allocated this when epoll was registered")
-                        .poll_out();
+                    self.socket_table.get_mut(offset).unwrap().poll_in();
+                    self.socket_table.get_mut(offset).unwrap().poll_out();
                 }
             }
             match yielder.yield_once().await {
@@ -503,10 +487,7 @@ impl SharedCatnapTransport {
 
     /// Internal function to get the raw file descriptor from a socket, given the socket descriptor.
     fn raw_fd_from_sd(&self, sd: &SockDesc) -> RawFd {
-        self.socket_table
-            .get(*sd)
-            .expect("shoudld have been allocated")
-            .as_raw_fd()
+        self.socket_table.get(*sd).unwrap().as_raw_fd()
     }
 
     /// Internal function to get the Socket from the metadata structure, given the socket descriptor.
@@ -516,7 +497,7 @@ impl SharedCatnapTransport {
 
     /// Internal function to get the metadata for the socket, given the socket descriptor.
     fn data_from_sd(&mut self, sd: &SockDesc) -> &mut SharedSocketData {
-        self.socket_table.get_mut(*sd).expect("should have been allocated")
+        self.socket_table.get_mut(*sd).unwrap()
     }
 }
 
@@ -526,7 +507,7 @@ impl SharedCatnapTransport {
 
 /// Internal function to extract the raw OS error code.
 fn get_libc_err(e: io::Error) -> i32 {
-    e.raw_os_error().expect("should have an os error code")
+    e.raw_os_error().unwrap()
 }
 
 //======================================================================================================================
@@ -806,7 +787,7 @@ impl NetworkTransport for SharedCatnapTransport {
         {
             self.data_from_sd(sd).push(addr, buf.clone(), &yielder).await?;
             // Clear out the original buffer.
-            buf.trim(buf.len()).expect("Should be able to empty the buffer");
+            buf.trim(buf.len()).unwrap();
             Ok(())
         }
     }

@@ -254,7 +254,7 @@ impl Ipv4Header {
     pub fn serialize(&self, buf: &mut [u8], payload_len: usize) {
         let buf: &mut [u8; IPV4_HEADER_MIN_SIZE as usize] = buf
             .try_into()
-            .expect("buffer should be large enough to hold an IPv4 header");
+            .unwrap();
 
         // Version + IHL.
         buf[0] = (self.version << 4) | self.ihl;

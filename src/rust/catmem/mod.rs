@@ -137,7 +137,7 @@ impl SharedCatmemLibOS {
                 // coroutine should be able to run due to state machine checks.
                 self.runtime
                     .free_queue::<SharedCatmemQueue>(&qd)
-                    .expect("queue should exist");
+                    .unwrap();
                 (qd, OperationResult::Close)
             },
             // Operation failed, thus warn and return an error.

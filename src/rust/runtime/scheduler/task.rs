@@ -93,7 +93,7 @@ impl<R: Unpin + Clone + Any> TaskWith for TaskWithResult<R> {
 
 impl<R: Unpin + Clone + Any> From<Box<dyn Any>> for TaskWithResult<R> {
     fn from(task: Box<dyn Any>) -> Self {
-        *task.downcast::<Self>().expect("Wrong type!")
+        *task.downcast::<Self>().unwrap()
     }
 }
 
@@ -103,7 +103,7 @@ impl<R: Unpin + Clone + Any> Task for TaskWithResult<R> {
     }
 
     fn get_id(&self) -> TaskId {
-        self.task_id.expect("should have this set immediately")
+        self.task_id.unwrap()
     }
 
     fn set_id(&mut self, id: TaskId) {

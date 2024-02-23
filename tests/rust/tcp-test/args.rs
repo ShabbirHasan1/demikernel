@@ -58,13 +58,13 @@ impl ProgramArguments {
 
         // Address of local socket.
         let local: SocketAddr = SocketAddr::V4({
-            let local: &String = matches.get_one::<String>("local").expect("missing address");
+            let local: &String = matches.get_one::<String>("local").unwrap();
             SocketAddrV4::from_str(local)?
         });
 
         // Address of remote socket.
         let remote: SocketAddr = SocketAddr::V4({
-            let remote: &String = matches.get_one::<String>("remote").expect("missing address");
+            let remote: &String = matches.get_one::<String>("remote").unwrap();
             SocketAddrV4::from_str(remote)?
         });
 

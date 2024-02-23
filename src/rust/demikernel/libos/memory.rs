@@ -129,8 +129,8 @@ impl MemoryLibOS {
 
             // If we have a timeout, check for expiration.
             if timeout.is_some()
-                && Instant::now().duration_since(start.expect("start should be set if timeout is"))
-                    > timeout.expect("timeout should still be set")
+                && Instant::now().duration_since(start.unwrap())
+                    > timeout.unwrap()
             {
                 return Err(Fail::new(libc::ETIMEDOUT, "timer expired"));
             }

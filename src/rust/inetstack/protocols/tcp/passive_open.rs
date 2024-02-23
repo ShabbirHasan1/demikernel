@@ -442,12 +442,12 @@ impl<N: NetworkRuntime> SharedPassiveSocket<N> {
         };
         let remote_window_size = (header_window_size)
             .checked_shl(remote_window_scale as u32)
-            .expect("TODO: Window size overflow")
+            .unwrap()
             .try_into()
-            .expect("TODO: Window size overflow");
+            .unwrap();
         let local_window_size = (self.tcp_config.get_receive_window_size() as u32)
             .checked_shl(local_window_scale as u32)
-            .expect("TODO: Window size overflow");
+            .unwrap();
         info!(
             "Window sizes: local {}, remote {}",
             local_window_size, remote_window_size

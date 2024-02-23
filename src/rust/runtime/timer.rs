@@ -70,11 +70,7 @@ impl SharedTimer {
             if now < entry.expiry {
                 break;
             }
-            let mut entry: TimerQueueEntry = self
-                .heap
-                .pop()
-                .expect("should have an entry because we were able to peek")
-                .0;
+            let mut entry: TimerQueueEntry = self.heap.pop().unwrap().0;
             entry.yielder.wake_with(Ok(()));
         }
         self.now = now;

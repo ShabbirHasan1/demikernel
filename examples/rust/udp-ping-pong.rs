@@ -147,8 +147,8 @@ impl UdpServer {
             };
 
             // Sanity check received data.
-            let ptr: *mut u8 = self.sga.expect("should be a valid sgarray").sga_segs[0].sgaseg_buf as *mut u8;
-            let len: usize = self.sga.expect("should be a valid sgarray").sga_segs[0].sgaseg_len as usize;
+            let ptr: *mut u8 = self.sga.unwrap().sga_segs[0].sgaseg_buf as *mut u8;
+            let len: usize = self.sga.unwrap().sga_segs[0].sgaseg_len as usize;
             let slice: &mut [u8] = unsafe { slice::from_raw_parts_mut(ptr, len) };
             for x in slice {
                 if *x != fill_char {
@@ -159,7 +159,7 @@ impl UdpServer {
             // Push data.
             let qt: QToken = match self
                 .libos
-                .pushto(self.sockqd, &self.sga.expect("should be a valid sgarray"), remote)
+                .pushto(self.sockqd, &self.sga.unwrap(), remote)
             {
                 Ok(qt) => qt,
                 Err(e) => {
@@ -171,7 +171,7 @@ impl UdpServer {
                 Ok(_) => anyhow::bail!("unexpected result"),
                 Err(e) => anyhow::bail!("operation failed: {:?}", e),
             };
-            match self.libos.sgafree(self.sga.expect("should be a valid sgarray")) {
+            match self.libos.sgafree(self.sga.unwrap()) {
                 Ok(_) => self.sga = None,
                 Err(e) => anyhow::bail!("failed to release scatter-gather array: {:?}", e),
             }
@@ -236,12 +236,12 @@ impl UdpClient {
         self.sga = Some(mksga(&mut self.libos, buffer_size, fill_char)?);
         match self
             .libos
-            .pushto(self.sockqd, &self.sga.expect("should be a valid sgarray"), remote)
+            .pushto(self.sockqd, &self.sga.unwrap(), remote)
         {
             Ok(qt) => qts.push(qt),
             Err(e) => anyhow::bail!("push failed: {:?}", e),
         };
-        match self.libos.sgafree(self.sga.expect("should be a valid sgarray")) {
+        match self.libos.sgafree(self.sga.unwrap()) {
             Ok(_) => self.sga = None,
             Err(e) => anyhow::bail!("failed to release scatter-gather array: {:?}", e),
         }
@@ -264,8 +264,8 @@ impl UdpClient {
                     self.sga = unsafe { Some(qr.qr_value.sga) };
 
                     // Sanity check received data.
-                    let ptr: *mut u8 = self.sga.expect("should be a valid sgarray").sga_segs[0].sgaseg_buf as *mut u8;
-                    let len: usize = self.sga.expect("should be a valid sgarray").sga_segs[0].sgaseg_len as usize;
+                    let ptr: *mut u8 = self.sga.unwrap().sga_segs[0].sgaseg_buf as *mut u8;
+                    let len: usize = self.sga.unwrap().sga_segs[0].sgaseg_len as usize;
                     let slice: &mut [u8] = unsafe { slice::from_raw_parts_mut(ptr, len) };
                     for x in slice {
                         if *x != fill_char {
@@ -275,7 +275,7 @@ impl UdpClient {
 
                     i += 1;
                     println!("ping {:?}", i);
-                    match self.libos.sgafree(self.sga.expect("should be a valid sgarray")) {
+                    match self.libos.sgafree(self.sga.unwrap()) {
                         Ok(_) => self.sga = None,
                         Err(e) => anyhow::bail!("failed to release scatter-gather array: {:?}", e),
                     }
@@ -288,12 +288,12 @@ impl UdpClient {
                     self.sga = Some(mksga(&mut self.libos, buffer_size, fill_char)?);
                     match self
                         .libos
-                        .pushto(self.sockqd, &self.sga.expect("should be a valid sgarray"), remote)
+                        .pushto(self.sockqd, &self.sga.unwrap(), remote)
                     {
                         Ok(qt) => qts.push(qt),
                         Err(e) => anyhow::bail!("push failed: {:?}", e),
                     };
-                    match self.libos.sgafree(self.sga.expect("should be a valid sgarray")) {
+                    match self.libos.sgafree(self.sga.unwrap()) {
                         Ok(_) => self.sga = None,
                         Err(e) => anyhow::bail!("failed to release scatter-gather array: {:?}", e),
                     }
@@ -303,7 +303,7 @@ impl UdpClient {
         }
 
         #[cfg(feature = "profiler")]
-        profiler::write(&mut std::io::stdout(), None).expect("failed to write to stdout");
+        profiler::write(&mut std::io::stdout(), None).unwrap();
 
         // TODO: close socket when we get close working properly in catnip.
 

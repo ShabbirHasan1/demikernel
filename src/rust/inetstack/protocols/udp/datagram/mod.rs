@@ -166,7 +166,7 @@ mod test {
 
         // Payload.
         let bytes: [u8; 8] = [0x0, 0x1, 0x0, 0x1, 0x0, 0x1, 0x0, 0x1];
-        let data: DemiBuffer = DemiBuffer::from_slice(&bytes).expect("bytes should be shorter than u16::MAX");
+        let data: DemiBuffer = DemiBuffer::from_slice(&bytes).unwrap();
 
         // Build expected header.
         let mut hdr: [u8; HEADER_SIZE] = [0; HEADER_SIZE];

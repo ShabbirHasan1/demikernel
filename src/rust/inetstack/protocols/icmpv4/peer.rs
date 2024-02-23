@@ -245,7 +245,7 @@ impl<N: NetworkRuntime> SharedIcmpv4Peer<N> {
         let result = me
             .inflight
             .get_mut(&(id, seq_num))
-            .expect("just inserted")
+            .unwrap()
             .get(Yielder::new())
             .fuse();
         pin_mut!(result);

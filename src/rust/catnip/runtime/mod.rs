@@ -463,7 +463,7 @@ impl NetworkRuntime for SharedDPDKRuntime {
                 // Get the body mbuf.
                 let body_mbuf: *mut rte_mbuf = if body.is_dpdk_allocated() {
                     // The body is already stored in an MBuf, just extract it from the DemiBuffer.
-                    body.into_mbuf().expect("'body' should be DPDK-allocated")
+                    body.into_mbuf().unwrap()
                 } else {
                     // The body is not dpdk-allocated, allocate a DPDKBuffer and copy the body into it.
                     let mut mbuf: DemiBuffer = match self.mm.alloc_body_mbuf() {
@@ -473,10 +473,10 @@ impl NetworkRuntime for SharedDPDKRuntime {
                     assert!(mbuf.len() >= body.len());
                     mbuf[..body.len()].copy_from_slice(&body[..]);
                     mbuf.trim(mbuf.len() - body.len()).unwrap();
-                    mbuf.into_mbuf().expect("mbuf should not be empty")
+                    mbuf.into_mbuf().unwrap()
                 };
 
-                let mut header_mbuf_ptr: *mut rte_mbuf = header_mbuf.into_mbuf().expect("mbuf should not be empty");
+                let mut header_mbuf_ptr: *mut rte_mbuf = header_mbuf.into_mbuf().unwrap();
                 // Safety: rte_pktmbuf_chain is a FFI that is safe to call as both of its args are valid MBuf pointers.
                 unsafe {
                     // Attach the body MBuf onto the header MBuf's buffer chain.
@@ -501,7 +501,7 @@ impl NetworkRuntime for SharedDPDKRuntime {
                 let frame_size = std::cmp::max(header_size + body.len(), MIN_PAYLOAD_SIZE);
                 header_mbuf.trim(header_mbuf.len() - frame_size).unwrap();
 
-                let mut header_mbuf_ptr: *mut rte_mbuf = header_mbuf.into_mbuf().expect("mbuf cannot be empty");
+                let mut header_mbuf_ptr: *mut rte_mbuf = header_mbuf.into_mbuf().unwrap();
                 let num_sent = unsafe { rte_eth_tx_burst(self.port_id, 0, &mut header_mbuf_ptr, 1) };
                 assert_eq!(num_sent, 1);
             }
@@ -517,7 +517,7 @@ impl NetworkRuntime for SharedDPDKRuntime {
             }
             let frame_size = std::cmp::max(header_size, MIN_PAYLOAD_SIZE);
             header_mbuf.trim(header_mbuf.len() - frame_size).unwrap();
-            let mut header_mbuf_ptr: *mut rte_mbuf = header_mbuf.into_mbuf().expect("mbuf cannot be empty");
+            let mut header_mbuf_ptr: *mut rte_mbuf = header_mbuf.into_mbuf().unwrap();
             let num_sent = unsafe { rte_eth_tx_burst(self.port_id, 0, &mut header_mbuf_ptr, 1) };
             assert_eq!(num_sent, 1);
         }

@@ -39,8 +39,8 @@ fn main() -> Result<()> {
         )
         .get_matches();
 
-    let verbose: bool = *matches.get_one::<bool>("verbose").expect("missing verbose flag");
-    let filename: &String = matches.get_one::<String>("src").expect("missing filename");
+    let verbose: bool = *matches.get_one::<bool>("verbose").unwrap();
+    let filename: &String = matches.get_one::<String>("src").unwrap();
 
     let lines: Vec<String> = read_input_file(filename)?;
 

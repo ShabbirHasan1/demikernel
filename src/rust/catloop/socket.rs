@@ -150,7 +150,7 @@ impl SharedMemorySocket {
         let new_port: u16 = runtime.alloc_ephemeral_port()?;
         let ipv4: Ipv4Addr = *self
             .local
-            .expect("Should be bound to a local address to accept connections")
+            .unwrap()
             .ip();
         loop {
             // Check if backlog is full.
@@ -169,7 +169,7 @@ impl SharedMemorySocket {
                 .pop_request_id(
                     &mut runtime,
                     &mut catmem,
-                    self.catmem_qd.expect("should be connected"),
+                    self.catmem_qd.unwrap(),
                     &yielder,
                 )
                 .await
@@ -309,7 +309,7 @@ impl SharedMemorySocket {
         // It is safe to unwrap here, because we have just checked for the socket state
         // and by construction it should be connected. If not, the socket state machine
         // was not correctly driven.
-        let qd: QDesc = self.catmem_qd.expect("socket should be connected");
+        let qd: QDesc = self.catmem_qd.unwrap();
         // TODO: Remove the copy eventually.
         match catmem.push_coroutine(qd, buf.clone(), yielder).await {
             (_, OperationResult::Push) => {
@@ -332,7 +332,7 @@ impl SharedMemorySocket {
         // It is safe to unwrap here, because we have just checked for the socket state
         // and by construction it should be connected. If not, the socket state machine
         // was not correctly driven.
-        let qd: QDesc = self.catmem_qd.expect("socket should be connected");
+        let qd: QDesc = self.catmem_qd.unwrap();
         match catmem.pop_coroutine(qd, Some(size), yielder).await {
             (_, OperationResult::Pop(_, incoming)) => {
                 let len: usize = incoming.len();
@@ -340,7 +340,7 @@ impl SharedMemorySocket {
                 buf.trim(size - len)?;
                 buf.copy_from_slice(&incoming[0..len]);
 
-                let remote: SocketAddr = self.remote.expect("can only pop from a connected socket").into();
+                let remote: SocketAddr = self.remote.unwrap().into();
                 Ok(Some(remote))
             },
             (_, OperationResult::Failed(e)) => Err(e),
@@ -415,7 +415,7 @@ impl SharedMemorySocket {
         port: u16,
         yielder: &Yielder,
     ) -> Result<QDesc, Fail> {
-        let catmem_qd: QDesc = self.catmem_qd.expect("should be connected");
+        let catmem_qd: QDesc = self.catmem_qd.unwrap();
         // Create underlying pipes before sending the port number through the
         // control duplex pipe. This prevents us from running into a race
         // condition were the remote makes progress faster than us and attempts

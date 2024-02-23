@@ -322,12 +322,7 @@ mod tests {
         // By polling once, our future should complete.
         scheduler.poll_all();
 
-        crate::ensure_eq!(
-            scheduler
-                .has_completed(task_id)
-                .expect("should find task completion status"),
-            true
-        );
+        crate::ensure_eq!(scheduler.has_completed(task_id).unwrap(), true);
 
         Ok(())
     }
@@ -347,22 +342,12 @@ mod tests {
         // By polling once, this future should make a transition.
         scheduler.poll_all();
 
-        crate::ensure_eq!(
-            scheduler
-                .has_completed(task_id)
-                .expect("should find task completion status"),
-            false
-        );
+        crate::ensure_eq!(scheduler.has_completed(task_id).unwrap(), false);
 
         // This shall make the future ready.
         scheduler.poll_all();
 
-        crate::ensure_eq!(
-            scheduler
-                .has_completed(task_id)
-                .expect("should find task completion status"),
-            true
-        );
+        crate::ensure_eq!(scheduler.has_completed(task_id).unwrap(), true);
 
         Ok(())
     }
@@ -380,12 +365,7 @@ mod tests {
         scheduler.poll_all();
 
         // Ensure that the first task has completed.
-        crate::ensure_eq!(
-            scheduler
-                .has_completed(task_id)
-                .expect("should find task completion status"),
-            true
-        );
+        crate::ensure_eq!(scheduler.has_completed(task_id).unwrap(), true);
 
         // Create another task.
         let task2: DummyTask = DummyTask::new(Box::pin(DummyCoroutine::new(0).fuse()));
@@ -444,9 +424,7 @@ mod tests {
 
         b.iter(|| {
             let task: DummyTask = DummyTask::new(Box::pin(black_box(DummyCoroutine::default().fuse())));
-            let task_id: TaskId = scheduler
-                .insert_task(task)
-                .expect("couldn't insert future in scheduler");
+            let task_id: TaskId = scheduler.insert_task(task).unwrap();
             black_box(task_id);
         });
     }

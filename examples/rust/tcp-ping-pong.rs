@@ -255,7 +255,7 @@ impl TcpServer {
                 let mut recvbuf: [u8; BUFFER_SIZE] = [0; BUFFER_SIZE];
                 if let Err(e) = pop_and_wait(
                     &mut self.libos,
-                    self.accepted_qd.expect("should be a valid queue descriptor"),
+                    self.accepted_qd.unwrap(),
                     &mut recvbuf,
                 ) {
                     anyhow::bail!("pop and wait failed: {:?}", e);
@@ -278,8 +278,8 @@ impl TcpServer {
                 )?);
                 if let Err(e) = push_and_wait(
                     &mut self.libos,
-                    self.accepted_qd.expect("should be a valid queue descriptor"),
-                    &self.sga.expect("should be a valid sgarray"),
+                    self.accepted_qd.unwrap(),
+                    &self.sga.unwrap(),
                 ) {
                     anyhow::bail!("push and wait failed: {:?}", e)
                 }
@@ -293,7 +293,7 @@ impl TcpServer {
         }
 
         #[cfg(feature = "profiler")]
-        profiler::write(&mut std::io::stdout(), None).expect("failed to write to stdout");
+        profiler::write(&mut std::io::stdout(), None).unwrap();
 
         // TODO: close socket when we get close working properly in catnip.
 
@@ -357,7 +357,7 @@ impl TcpClient {
                 if let Err(e) = push_and_wait(
                     &mut self.libos,
                     self.sockqd,
-                    &self.sga.expect("should be a valid sgarray"),
+                    &self.sga.unwrap(),
                 ) {
                     anyhow::bail!("push and wait failed: {:?}", e);
                 }
@@ -386,7 +386,7 @@ impl TcpClient {
         }
 
         #[cfg(feature = "profiler")]
-        profiler::write(&mut std::io::stdout(), None).expect("failed to write to stdout");
+        profiler::write(&mut std::io::stdout(), None).unwrap();
 
         // TODO: close socket when we get close working properly in catnip.
 

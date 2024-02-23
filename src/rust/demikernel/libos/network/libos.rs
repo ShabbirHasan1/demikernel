@@ -220,12 +220,12 @@ impl<T: NetworkTransport> SharedNetworkLibOS<T> {
                 // remote address.
                 let addr: SocketAddr = new_queue
                     .remote()
-                    .expect("An accepted socket must have a remote address");
+                    .unwrap();
                 let new_qd: QDesc = self.runtime.alloc_queue(new_queue);
                 // FIXME: add IPv6 support; https://github.com/microsoft/demikernel/issues/935
                 (
                     qd,
-                    OperationResult::Accept((new_qd, unwrap_socketaddr(addr).expect("we only support IPv4"))),
+                    OperationResult::Accept((new_qd, unwrap_socketaddr(addr).unwrap())),
                 )
             },
             Err(e) => {
@@ -314,7 +314,7 @@ impl<T: NetworkTransport> SharedNetworkLibOS<T> {
                 if let Some(local) = queue.local() {
                     // FIXME: add IPv6 support; https://github.com/microsoft/demikernel/issues/935
                     self.runtime.remove_socket_id_to_qd(&SocketId::Passive(
-                        unwrap_socketaddr(local).expect("we only support IPv4"),
+                        unwrap_socketaddr(local).unwrap(),
                     ));
 
                     // Check if this is an ephemeral port.
@@ -333,7 +333,7 @@ impl<T: NetworkTransport> SharedNetworkLibOS<T> {
                 // checks.
                 self.runtime
                     .free_queue::<SharedNetworkQueue<T>>(&qd)
-                    .expect("queue should exist");
+                    .unwrap();
                 (qd, OperationResult::Close)
             },
             Err(e) => {
@@ -476,7 +476,7 @@ impl<T: NetworkTransport> SharedNetworkLibOS<T> {
             // FIXME: add IPv6 support; https://github.com/microsoft/demikernel/issues/935
             Ok((Some(addr), buf)) => (
                 qd,
-                OperationResult::Pop(Some(unwrap_socketaddr(addr).expect("we only support IPv4")), buf),
+                OperationResult::Pop(Some(unwrap_socketaddr(addr).unwrap()), buf),
             ),
             Ok((None, buf)) => (qd, OperationResult::Pop(None, buf)),
             Err(e) => {

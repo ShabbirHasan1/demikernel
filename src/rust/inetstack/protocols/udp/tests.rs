@@ -92,7 +92,7 @@ fn udp_push_pop() -> Result<()> {
     bob.udp_bind(bob_fd, bob_addr)?;
 
     // Send data to Bob.
-    let buf: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).expect("slice should fit in DemiBuffer");
+    let buf: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).unwrap();
     let alice_qt: QToken = alice.udp_pushto(alice_fd, buf.clone(), bob_addr)?;
     match alice.wait(alice_qt)? {
         (_, OperationResult::Push) => {},
@@ -141,7 +141,7 @@ fn udp_push_pop_wildcard_address() -> Result<()> {
     bob.udp_bind(bob_fd, SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, bob_port))?;
 
     // Send data to Bob.
-    let buf: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).expect("slice should fit in DemiBuffer");
+    let buf: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).unwrap();
     let qt: QToken = alice.udp_pushto(alice_fd, buf.clone(), bob_addr)?;
     match alice.wait(qt)? {
         (_, OperationResult::Push) => {},
@@ -190,7 +190,7 @@ fn udp_ping_pong() -> Result<()> {
     bob.udp_bind(bob_fd, bob_addr)?;
 
     // Send data to Bob.
-    let buf_a: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).expect("slice should fit in DemiBuffer");
+    let buf_a: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).unwrap();
     let alice_qt: QToken = alice.udp_pushto(alice_fd, buf_a.clone(), bob_addr)?;
     match alice.wait(alice_qt)? {
         (_, OperationResult::Push) => {},
@@ -213,7 +213,7 @@ fn udp_ping_pong() -> Result<()> {
     now += Duration::from_micros(1);
 
     // Send data to Alice.
-    let buf_b: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).expect("slice should fit in DemiBuffer");
+    let buf_b: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).unwrap();
     let bob_qt2: QToken = bob.udp_pushto(bob_fd, buf_b.clone(), alice_addr)?;
     bob.poll();
     match bob.wait(bob_qt2)? {
@@ -324,7 +324,7 @@ fn udp_loop2_push_pop() -> Result<()> {
     // Loop.
     for b in 0..1000 {
         // Send data to Bob.
-        let buf: DemiBuffer = DemiBuffer::from_slice(&vec![(b % 256) as u8; 32][..]).expect("slice should fit");
+        let buf: DemiBuffer = DemiBuffer::from_slice(&vec![(b % 256) as u8; 32][..]).unwrap();
         let alice_qt: QToken = alice.udp_pushto(alice_fd, buf.clone(), bob_addr)?;
         match alice.wait(alice_qt)? {
             (_, OperationResult::Push) => {},
@@ -387,7 +387,7 @@ fn udp_loop2_ping_pong() -> Result<()> {
     // Loop.
     for _ in 0..1000 {
         // Send data to Bob.
-        let buf_a: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).expect("slice should fit in DemiBuffer");
+        let buf_a: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).unwrap();
         let alice_qt: QToken = alice.udp_pushto(alice_fd, buf_a.clone(), bob_addr)?;
         match alice.wait(alice_qt)? {
             (_, OperationResult::Push) => {},
@@ -410,7 +410,7 @@ fn udp_loop2_ping_pong() -> Result<()> {
         now += Duration::from_micros(1);
 
         // Send data to Alice.
-        let buf_b: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).expect("slice should fit in DemiBuffer");
+        let buf_b: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).unwrap();
         let bob_qt: QToken = bob.udp_pushto(bob_fd, buf_b.clone(), alice_addr)?;
         match bob.wait(bob_qt)? {
             (_, OperationResult::Push) => {},
@@ -536,7 +536,7 @@ fn udp_pop_not_bound() -> Result<()> {
     // Bob does not create a socket.
 
     // Send data to Bob.
-    let buf: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).expect("slice should fit in DemiBuffer");
+    let buf: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).unwrap();
     let alice_qt: QToken = alice.udp_pushto(alice_fd, buf, bob_addr)?;
     match alice.wait(alice_qt)? {
         (_, OperationResult::Push) => {},
@@ -580,7 +580,7 @@ fn udp_push_bad_file_descriptor() -> Result<()> {
     bob.udp_bind(bob_fd, bob_addr)?;
 
     // Send data to Bob.
-    let buf: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).expect("slice should fit in DemiBuffer");
+    let buf: DemiBuffer = DemiBuffer::from_slice(&vec![0x5a; 32][..]).unwrap();
     match alice.udp_pushto(QDesc::try_from(u32::MAX)?, buf.clone(), bob_addr) {
         Err(e) if e.errno == EBADF => {},
         _ => anyhow::bail!("pushto should have failed"),

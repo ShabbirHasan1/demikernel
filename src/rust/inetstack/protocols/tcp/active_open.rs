@@ -194,15 +194,15 @@ impl<N: NetworkRuntime> SharedActiveOpenSocket<N> {
 
         let rx_window_size: u32 = (self.tcp_config.get_receive_window_size())
             .checked_shl(local_window_scale as u32)
-            .expect("TODO: Window size overflow")
+            .unwrap()
             .try_into()
-            .expect("TODO: Window size overflow");
+            .unwrap();
 
         let tx_window_size: u32 = (header.window_size)
             .checked_shl(remote_window_scale as u32)
-            .expect("TODO: Window size overflow")
+            .unwrap()
             .try_into()
-            .expect("TODO: Window size overflow");
+            .unwrap();
 
         info!("Window sizes: local {}, remote {}", rx_window_size, tx_window_size);
         info!(

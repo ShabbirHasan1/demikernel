@@ -21,9 +21,9 @@ fn main() -> Result<()> {
                 .unwrap()
         })
         .lexer_in_src_dir("tokens.l")
-        .expect("failed to load lexical rules")
+        .unwrap()
         .build()
-        .expect("failed to build lexer");
+        .unwrap();
 
     Ok(())
 }

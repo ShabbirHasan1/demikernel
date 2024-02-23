@@ -172,7 +172,7 @@ impl UdpServer {
         }
 
         #[cfg(feature = "profiler")]
-        profiler::write(&mut std::io::stdout(), None).expect("failed to write to stdout");
+        profiler::write(&mut std::io::stdout(), None).unwrap();
 
         // TODO: close socket when we get close working properly in catnip.
         Ok(())
@@ -258,7 +258,7 @@ impl UdpClient {
         }
 
         #[cfg(feature = "profiler")]
-        profiler::write(&mut std::io::stdout(), None).expect("failed to write to stdout");
+        profiler::write(&mut std::io::stdout(), None).unwrap();
 
         // TODO: close socket when we get close working properly in catnip.
         Ok(())

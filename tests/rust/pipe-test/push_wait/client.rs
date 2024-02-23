@@ -72,7 +72,7 @@ impl PipeClient {
 
         // Succeed to close pipe.
         // The following call to except() is safe because pipeqd is ensured to be open and assigned Some() value.
-        match self.libos.close(self.pipeqd.expect("pipe should not be closed")) {
+        match self.libos.close(self.pipeqd.unwrap()) {
             Ok(()) => self.pipeqd = None,
             Err(e) => {
                 anyhow::bail!("close() failed (error={:?})", e)
@@ -119,7 +119,7 @@ impl PipeClient {
 
         // Succeed to close pipe.
         // The following call to except() is safe because pipeqd is ensured to be open and assigned Some() value.
-        let qt_close: QToken = match self.libos.async_close(self.pipeqd.expect("pipe should not be closed")) {
+        let qt_close: QToken = match self.libos.async_close(self.pipeqd.unwrap()) {
             Ok(qt) => qt,
             Err(e) => anyhow::bail!("async_close() failed (error={:?})", e),
         };
@@ -167,7 +167,7 @@ impl PipeClient {
 
         // Push scatter-gather array.
         // The following call to except() is safe because pipeqd is ensured to be open and assigned Some() value.
-        let qt: Result<QToken> = match self.libos.push(self.pipeqd.expect("pipe should not be closed"), &sga) {
+        let qt: Result<QToken> = match self.libos.push(self.pipeqd.unwrap(), &sga) {
             Ok(qt) => Ok(qt),
             Err(e) => Err(anyhow::anyhow!("push() failed (error={:?})", e)),
         };

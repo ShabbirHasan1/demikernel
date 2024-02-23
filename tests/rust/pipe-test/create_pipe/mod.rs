@@ -74,8 +74,8 @@ fn create_pipe_with_same_name_in_two_liboses(pipe_name: &str) -> Result<()> {
     {
         let libos: &mut LibOS = &mut {
             // Ok to use expect here because we should have parsed the LibOSName previously.
-            let libos_name: LibOSName = LibOSName::from_env().expect("Should have a valid LibOS name").into();
-            LibOS::new(libos_name).expect("Should be able to create another libOS")
+            let libos_name: LibOSName = LibOSName::from_env().unwrap().into();
+            LibOS::new(libos_name).unwrap()
         };
 
         create_pipe(libos, pipe_name)?;
@@ -83,8 +83,8 @@ fn create_pipe_with_same_name_in_two_liboses(pipe_name: &str) -> Result<()> {
     {
         let libos: &mut LibOS = &mut {
             // Ok to use expect here because we should have parsed the LibOSName previously.
-            let libos_name: LibOSName = LibOSName::from_env().expect("Should have a valid LibOS name").into();
-            LibOS::new(libos_name).expect("Should be able to create another libOS")
+            let libos_name: LibOSName = LibOSName::from_env().unwrap().into();
+            LibOS::new(libos_name).unwrap()
         };
 
         create_pipe_and_close(libos, pipe_name)?;
