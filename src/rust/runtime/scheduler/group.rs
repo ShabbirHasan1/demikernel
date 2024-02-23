@@ -162,17 +162,12 @@ impl TaskGroup {
     }
 
     pub fn get_id(&self, pin_slab_index: usize) -> TaskId {
-        self.tasks
-            .get(pin_slab_index)
-            .expect(format!("Invalid offset: {:?}", pin_slab_index).as_str())
-            .get_id()
+        self.tasks.get(pin_slab_index).unwrap().get_id()
     }
 
     fn get_pinned_task_ptr(&mut self, pin_slab_index: usize) -> Pin<&mut Box<dyn Task>> {
         // Get the pinned ref.
-        self.tasks
-            .get_pin_mut(pin_slab_index)
-            .expect(format!("Invalid offset: {:?}", pin_slab_index).as_str())
+        self.tasks.get_pin_mut(pin_slab_index).unwrap()
     }
 
     fn get_waker(&self, waker_page_index: usize, waker_page_offset: usize) -> Waker {
