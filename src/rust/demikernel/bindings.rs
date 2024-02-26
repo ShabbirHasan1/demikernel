@@ -51,6 +51,14 @@ use ::std::{
     slice,
     time::Duration,
 };
+use signal_hook::{
+    consts::SIGINT,
+    iterator::{
+        Signals,
+        SignalsInfo,
+    },
+};
+use std::thread;
 
 #[cfg(test)]
 use ::std::net::{
@@ -90,6 +98,13 @@ pub extern "C" fn demi_init(argc: c_int, argv: *mut *mut c_char) -> c_int {
             return -e.errno;
         },
     };
+
+    let mut signals: SignalsInfo = Signals::new(&[SIGINT]).unwrap();
+    thread::spawn(move || {
+        for sig in signals.forever() {
+            println!("Received signal {:?}", sig);
+        }
+    });
 
     unsafe { DEMIKERNEL = RefCell::new(Some(libos)) };
 

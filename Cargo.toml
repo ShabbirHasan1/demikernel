@@ -42,6 +42,7 @@ slab = "0.4.9"
 socket2 = "0.5.5"
 yaml-rust = "0.4.5"
 x86 = "0.52.0"
+signal-hook = "0.3.17"
 
 # Local crates.
 nettest = { path = "nettest" }
