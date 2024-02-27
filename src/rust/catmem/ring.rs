@@ -126,12 +126,22 @@ impl Ring {
     /// ring, return [false], otherwise, return [true] if successfully enqueued.
     pub fn try_push(&mut self, buf: &[u8]) -> Result<usize, Fail> {
         self.state_machine.may_push()?;
-        // Write the header.
-        let mut msg: Vec<u8> = REGULAR_MESSAGE_HEADER.to_vec();
-        msg.append(&mut buf.to_vec());
+
+        // Define the size of the fixed-size array.
+        const ARRAY_SIZE: usize = REGULAR_MESSAGE_HEADER.len() + RECVBUF_SIZE_MAX;
+
+        // Create a fixed-size array.
+        let mut msg: [u8; ARRAY_SIZE] = [0; ARRAY_SIZE];
+
+        // Copy the header into the array.
+        msg[..REGULAR_MESSAGE_HEADER.len()].copy_from_slice(&REGULAR_MESSAGE_HEADER);
+
+        // Copy the buffer into the array.
+        let buf_len = buf.len();
+        msg[REGULAR_MESSAGE_HEADER.len()..REGULAR_MESSAGE_HEADER.len() + buf_len].copy_from_slice(buf);
 
         // Write data to the ring buffer.
-        Ok(self.push_buf.try_push(&msg)? - HEADER_SIZE)
+        Ok(self.push_buf.try_push(&msg[..REGULAR_MESSAGE_HEADER.len() + buf_len])? - HEADER_SIZE)
     }
 
     /// Closes the target ring.
