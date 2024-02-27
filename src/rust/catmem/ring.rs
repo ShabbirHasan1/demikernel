@@ -12,6 +12,7 @@ use crate::{
     },
     runtime::{
         fail::Fail,
+        limits::RECVBUF_SIZE_MAX,
         network::ring::{
             operation::RingControlOperation,
             state::RingStateMachine,
@@ -91,7 +92,7 @@ impl Ring {
     pub fn try_pop(&mut self, buf: &mut [u8]) -> Result<(usize, bool), Fail> {
         self.state_machine.may_pop()?;
 
-        let mut msg: Vec<u8> = vec![0; buf.len() + HEADER_SIZE];
+        let mut msg: Vec<u8> = vec![0; RECVBUF_SIZE_MAX + HEADER_SIZE];
         // Read data from the ring buffer.
         let msg_len: usize = self.pop_buf.try_pop(&mut msg)? - HEADER_SIZE;
 
