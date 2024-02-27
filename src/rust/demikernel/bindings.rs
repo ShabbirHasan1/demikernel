@@ -102,9 +102,9 @@ pub extern "C" fn demi_init(argc: c_int, argv: *mut *mut c_char) -> c_int {
     let mut signals: SignalsInfo = Signals::new(&[SIGINT]).unwrap();
     thread::spawn(move || {
         for sig in signals.forever() {
-            println!("Received signal {:?}", sig);
+            println!("Received signal, dumping perf {:?}", sig);
             #[cfg(feature = "profiler")]
-            crate::perftools::profiler::write(&mut std::io::stdout(), None).unwrap();
+            crate::perftools::profiler::write(&mut std::io::stderr(), None).unwrap();
             std::process::exit(0);
         }
     });
