@@ -235,10 +235,16 @@ impl TcpEchoClient {
             // Dump statistics.
             if let Some(log_interval) = log_interval {
                 if last_log.elapsed() > Duration::from_secs(log_interval) {
-                    let time_elapsed: u64 = (Instant::now() - start).as_secs() as u64;
-                    let nrequests: u64 = (self.nbytes / self.bufsize) as u64;
-                    let rps: u64 = nrequests / time_elapsed;
-                    println!("INFO: {:?} rps", rps);
+                    let time_elapsed: f64 = (Instant::now() - last_log).as_secs() as f64;
+                    let nrequests: f64 = (self.nbytes / self.bufsize) as f64;
+                    let rps: f64 = nrequests / time_elapsed;
+                    println!(
+                        "INFO: {:?} requests, {:2?} rps, p50 {:?} ns, p99 {:?} ns",
+                        nrequests,
+                        rps,
+                        self.stats.percentile(0.50)?.start(),
+                        self.stats.percentile(0.99)?.start()
+                    );
                     last_log = Instant::now();
                     self.nbytes = 0;
                 }
@@ -276,26 +282,6 @@ impl TcpEchoClient {
         }
 
         Ok(())
-    }
-
-    // Makes a scatter-gather array.
-    fn mksga(&mut self, size: usize, value: u8) -> Result<demi_sgarray_t> {
-        // Allocate scatter-gather array.
-        let sga: demi_sgarray_t = match self.libos.sgaalloc(size) {
-            Ok(sga) => sga,
-            Err(e) => anyhow::bail!("failed to allocate scatter-gather array: {:?}", e),
-        };
-
-        // Ensure that scatter-gather array has the requested size.
-        assert!(sga.sga_segs[0].sgaseg_len as usize == size);
-
-        // Fill in scatter-gather array.
-        let ptr: *mut u8 = sga.sga_segs[0].sgaseg_buf as *mut u8;
-        let len: usize = sga.sga_segs[0].sgaseg_len as usize;
-        let slice: &mut [u8] = unsafe { slice::from_raw_parts_mut(ptr, len) };
-        slice.fill(value);
-
-        Ok(sga)
     }
 
     /// Creates a scatter-gather-array with a timestamp.
